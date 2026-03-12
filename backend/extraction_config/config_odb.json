@@ -14,14 +14,14 @@
                         "point1": [0.0, 0.2],
                         "point2": [3.2, 0.2],
                         "y_coordinate": -0.02,
-                        "num_points": 641
+                        "num_points": 3841
                     },
                     {
                         "name": "depth_profile_rs",
                         "point1": [1.10435, 0.2],
                         "point2": [1.10435, 0.15],
                         "y_coordinate": -0.02,
-                        "num_points": 6
+                        "num_points": 601
                     }
                 ]
             },
@@ -35,14 +35,14 @@
                         "point1": [0.0, 0.195],
                         "point2": [3.2, 0.195],
                         "y_coordinate": -0.02,
-                        "num_points": 641
+                        "num_points": 3841
                     },
                     {
                         "name": "depth_profile_rs",
                         "point1": [1.10435, 0.195],
                         "point2": [1.10435, 0.145],
                         "y_coordinate": -0.02,
-                        "num_points": 11
+                        "num_points": 601
                     }
                 ]
             }
