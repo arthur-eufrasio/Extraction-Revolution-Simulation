@@ -1,16 +1,21 @@
 {
     "DA718_RST330_h002_vc300_VB0_abq2024_CORRECT": {
-        "step_index": 0,
-        "step_name": "orthogonalCutting",
-        "frame_start": 0,
-        "frame_stop": 9,
-        "chipplate_instance": "CPP-1",
         "base_name_field_variables": "S_ASSEMBLY_EULERIAN-1_DA718_PENG20-1",
-        "field_variables": ["S13", "S33"],
-        "path_parameters": {
-            "length": 2.0,
-            "height": 0.88,
-            "thickness": 0.02
-        }
+        "field_variables": ["S11"],
+        "steps": [
+            {
+                "step_name": "relaxation_1",
+                "step_index": 0,
+                "frames": [61],
+                "paths": [
+                    {
+                        "name": "whole_surf",
+                        "point1": [0.0, 0.88],
+                        "point2": [-2.0, 0.88],
+                        "y_coordinate": 0.02
+                    }
+                ]
+            }
+        ]
     }
 }

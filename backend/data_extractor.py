@@ -34,63 +34,67 @@ class OdbDataExtractor:
 
     def process_single_odb(self, odb_name, config):
         self.log("[Extractor] Processing ODB: {}".format(odb_name))
-        
+
         odb_path = "odbs/{}.odb".format(odb_name)
         odb = openOdb(path=odb_path)
-        
+
         self.extracted_data[odb_name] = {}
-        step_name = str(config["step_name"])
-        # frame_start = config["frame_start"]
-        # frame_stop = config["frame_stop"]
         fields = [str(f) for f in config["field_variables"]]
-        
+
         for field in fields:
             self.extracted_data[odb_name][field] = {}
 
         self._extract_paths(odb, odb_name, config, fields)
-        self._extract_history_outputs(odb, odb_name, step_name)
-        # self._extract_contact_normal_force(odb, odb_name, step_name, frame_start, frame_stop, config)
+
+        for step_config in config["steps"]:
+            step_name = str(step_config["step_name"])
+            self._extract_history_outputs(odb, odb_name, step_name)
 
     def _extract_paths(self, odb, odb_name, config, fields):
-        length = config["path_parameters"]["length"]
-        height = config["path_parameters"]["height"]
-        thickness = config["path_parameters"]["thickness"]
-        
-        step_name = str(config["step_name"])
-        step_index = config["step_index"]
-        base_field_name = str(config["base_name_field_variables"]) 
-        
-        frames = range(config["frame_start"], config["frame_stop"] + 1)
-        
-        paths_to_extract = [
-            {
-                "type": "whole_surf",
-                "points": ((0.0, thickness, height), (-length, thickness, height))
-            }
-        ]
+        base_field_name = str(config["base_name_field_variables"])
+        steps_config = config["steps"]
 
         session.viewports['Viewport: 1'].setValues(displayedObject=odb)
 
-        for path_info in paths_to_extract:
-            path_type = path_info["type"]
-            path_points = path_info["points"]
-            path_obj_name = "path_{}_{}".format(path_type, odb_name)
-            
-            session_path = session.Path(
-                name=path_obj_name, 
-                type=POINT_LIST, 
-                expression=path_points
-            )
+        for step_config in steps_config:
+            step_name = str(step_config["step_name"])
+            step_index = step_config["step_index"]
+            frames = step_config["frames"]
+            paths_config = step_config["paths"]
 
-            for field in fields:
-                self.extracted_data[odb_name][field][path_type] = []
-                
-                for f_idx in frames:
-                    self._process_frame_path(
-                        odb, step_name, f_idx, session_path, 
-                        field, path_type, odb_name,
-                        step_index, base_field_name 
-                    )
+            self.log("[Extractor] Step '{}', extracting {} path(s)".format(
+                step_name, len(paths_config)))
+
+            for path_config in paths_config:
+                path_name = str(path_config["name"])
+                p1 = path_config["point1"]   # [x, z]
+                p2 = path_config["point2"]   # [x, z]
+                y_coord = path_config.get("y_coordinate", 0.0)
+
+                # Build 3D path points: (x, y, z) — path lies in the XZ plane
+                point1_3d = (p1[0], y_coord, p1[1])
+                point2_3d = (p2[0], y_coord, p2[1])
+
+                path_obj_name = "path_{}_{}".format(path_name, odb_name)
+                session_path = session.Path(
+                    name=path_obj_name,
+                    type=POINT_LIST,
+                    expression=(point1_3d, point2_3d)
+                )
+
+                self.log("[Extractor] Path '{}': ({}) -> ({})".format(
+                    path_name, point1_3d, point2_3d))
+
+                for field in fields:
+                    if path_name not in self.extracted_data[odb_name][field]:
+                        self.extracted_data[odb_name][field][path_name] = []
+
+                    for f_idx in frames:
+                        self._process_frame_path(
+                            odb, step_name, f_idx, session_path,
+                            field, path_name, odb_name,
+                            step_index, base_field_name
+                        )
 
     def _process_frame_path(self, odb, step_name, frame_index, path_obj, field, path_type, odb_name, step_index, base_field_name):
         step = odb.steps[step_name]
@@ -104,20 +108,25 @@ class OdbDataExtractor:
             name="temp_xy_data",
             path=path_obj,
             frame=frame_index,
-            step=step_index, 
+            step=step_index,
             includeIntersections=True,
             shape=UNDEFORMED,
             labelType=TRUE_DISTANCE,
-            variable=(base_field_name, INTEGRATION_POINT, ((COMPONENT, field),)),
+            variable=(base_field_name, ELEMENT_NODAL, ((COMPONENT, field),)),
             pathStyle=PATH_POINTS
         )
-        
+
         clean_data = [
-            {"true_distance": item[0], "stress": item[1]} 
+            {"true_distance": item[0], "stress": item[1]}
             for item in xy_data_obj.data
         ]
-        
-        record = {"xy_datalist": tuple(clean_data), "time": frame_time}
+
+        record = {
+            "step": step_name,
+            "frame": frame_index,
+            "time": frame_time,
+            "xy_datalist": tuple(clean_data)
+        }
         self.extracted_data[odb_name][field][path_type].append(record)
 
     def _extract_history_outputs(self, odb, odb_name, step_name):
