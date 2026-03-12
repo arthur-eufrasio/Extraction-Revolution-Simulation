@@ -1,18 +1,44 @@
 {
-    "DA718_RST330_h002_vc300_VB0_abq2024_CORRECT": {
+    "RevolutionsSimulation": {
+        "odb_path": "S:/Arthur/01_Simulations/10_REVOLUTIONS_LOAD_SIMULATION/odb_revolution/RevolutionsSimulation.odb",
         "base_name_field_variables": "S_ASSEMBLY_EULERIAN-1_DA718_PENG20-1",
         "field_variables": ["S11"],
         "steps": [
             {
                 "step_name": "relaxation_1",
-                "step_index": 0,
+                "step_index": 1,
                 "frames": [61],
                 "paths": [
                     {
-                        "name": "whole_surf",
-                        "point1": [0.0, 0.88],
-                        "point2": [-2.0, 0.88],
-                        "y_coordinate": 0.02
+                        "name": "surface_profile_rs",
+                        "point1": [0.0, 0.2],
+                        "point2": [3.2, 0.2],
+                        "y_coordinate": -0.02
+                    },
+                    {
+                        "name": "depth_profile_rs",
+                        "point1": [1.10435, 0.2],
+                        "point2": [1.10435, 0.15],
+                        "y_coordinate": 0.0
+                    }
+                ]
+            },
+            {
+                "step_name": "relaxation_2",
+                "step_index": 4,
+                "frames": [61],
+                "paths": [
+                    {
+                        "name": "surface_profile_rs",
+                        "point1": [0.0, 0.195],
+                        "point2": [3.2, 0.195],
+                        "y_coordinate": -0.02
+                    },
+                    {
+                        "name": "depth_profile_rs",
+                        "point1": [1.10435, 0.2],
+                        "point2": [1.10435, 0.15],
+                        "y_coordinate": 0.0
                     }
                 ]
             }

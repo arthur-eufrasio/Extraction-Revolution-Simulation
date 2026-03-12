@@ -35,7 +35,7 @@ class OdbDataExtractor:
     def process_single_odb(self, odb_name, config):
         self.log("[Extractor] Processing ODB: {}".format(odb_name))
 
-        odb_path = "odbs/{}.odb".format(odb_name)
+        odb_path = config.get("odb_path")
         odb = openOdb(path=odb_path)
 
         self.extracted_data[odb_name] = {}
@@ -69,12 +69,14 @@ class OdbDataExtractor:
 
                 point1_3d = (p1[0], y_coord, p1[1])
                 point2_3d = (p2[0], y_coord, p2[1])
+                
+                points_list = self._linspace_points(point1_3d, point2_3d, num_points=50)
 
                 path_obj_name = "path_{}_{}".format(path_name, odb_name)
                 session_path = session.Path(
                     name=path_obj_name,
                     type=POINT_LIST,
-                    expression=(point1_3d, point2_3d)
+                    expression=points_list
                 )
 
                 self.log("[Extractor] Path '{}': ({}) -> ({})".format(
@@ -123,6 +125,20 @@ class OdbDataExtractor:
             "time": frame_time,
             "data": clean_data
         }
+
+    def _linspace_points(self, point_start, point_end, num_points):
+        if num_points == 1:
+            return [point_start]
+        
+        points = []
+        for i in range(num_points):
+            t = i / (num_points - 1)
+            point = tuple(
+                point_start[j] + t * (point_end[j] - point_start[j])
+                for j in range(3)
+            )
+            points.append(point)
+        return tuple(points)
 
     def save_to_json(self):
         self.log("[Extractor] Saving data to JSON...")
