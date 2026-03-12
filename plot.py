@@ -83,6 +83,7 @@ class StressProfilePlotter:
         profile_keyword,
         title_suffix,
         save_dir_path,
+        save_plot=False,
         frame_selector="last"
     ):
         step_map = self.data[odb_name][field_name]
@@ -125,7 +126,8 @@ class StressProfilePlotter:
         ax.legend()
         plt.tight_layout()
 
-        if save_dir_path:
+        # Conditionally save the plot
+        if save_plot and save_dir_path:
             if not os.path.exists(save_dir_path):
                 os.makedirs(save_dir_path)
             file_name = "{}_{}_{}.png".format(odb_name, field_name, profile_keyword)
@@ -133,13 +135,14 @@ class StressProfilePlotter:
             plt.savefig(save_file_path)
             print("Plot saved to: {}".format(save_file_path))
 
-        plt.close(fig)
+        # Notice that plt.close(fig) was removed here so the figures stay active
 
     def plot_step_stress_profiles(
         self,
         odb_name=None,
         field_name=None,
         save_dir_path=None,
+        save_plot=False,
         frame_selector="last"
     ):
         selected_odb, selected_field = self._get_default_odb_and_field(
@@ -157,6 +160,7 @@ class StressProfilePlotter:
             profile_keyword="surface",
             title_suffix="Surface Stress Profile Across Steps",
             save_dir_path=save_dir_path,
+            save_plot=save_plot,
             frame_selector=frame_selector
         )
         self._plot_profile_by_steps(
@@ -165,8 +169,12 @@ class StressProfilePlotter:
             profile_keyword="depth",
             title_suffix="Depth Stress Profile Across Steps",
             save_dir_path=save_dir_path,
+            save_plot=save_plot,
             frame_selector=frame_selector
         )
+
+        # Always show all generated plots at the end
+        plt.show()
 
 
 def main():
@@ -178,6 +186,7 @@ def main():
     if plotter.load_data():
         plotter.plot_step_stress_profiles(
             save_dir_path=SAVE_PLOT_DIR,
+            save_plot=True,  # Set this to False if you only want to view the plots
             frame_selector="last"
         )
 
