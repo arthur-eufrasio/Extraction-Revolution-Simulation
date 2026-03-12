@@ -65,7 +65,7 @@ class OdbDataExtractor:
                 path_name = str(path_config["name"])
                 p1 = path_config["point1"]  
                 p2 = path_config["point2"]   
-                y_coord = path_config.get("y_coordinate", 0.0)
+                y_coord = path_config["y_coordinate"]
                 num_points = path_config["num_points"]
 
                 point1_3d = (p1[0], y_coord, p1[1])
